@@ -1,0 +1,8 @@
+*env/
+*.env
+build/
+__pycache__/
+*.egg-info/
+.DS_Store
+.coverage
+lcov.info
