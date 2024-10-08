@@ -3,9 +3,9 @@ name = "doodle_jump"
 version = "0.0.1"
 description = "Computer Organization Midterm Project"
 dependencies = [
-    "mpu6050-raspberrypi==1.2",
-    "smbus==1.1.post2",
-    "pygame==2.6.1"
+    'pygame==2.6.1',
+    'mpu6050-raspberrypi==1.2;platform_system == "Linux"',
+    'smbus==1.1.post2;platform_system == "Linux"',
 ]
 requires-python = ">=3.11"
 
@@ -15,4 +15,3 @@ py-modules = []
 # Black formatter
 [tool.black]
 line-length = 79
-
