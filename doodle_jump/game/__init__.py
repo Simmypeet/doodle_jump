@@ -1,37 +1,48 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generator, Sequence, Type, TypeVar
-from doodle_jump.controller import Controller
-from doodle_jump.controller.keyboard import Keyboard
+from dataclasses import dataclass
+from typing import Callable, Generator, Sequence, Type, TypeVar
 
 from datetime import timedelta
+from pygame.surface import Surface
+from pygame.event import Event
 
 import pygame
 
+from doodle_jump.render_target import RenderTarget
+
+
+@dataclass(frozen=True)
+class FrameInfo:
+    time: timedelta
+    events: Sequence[Event]
+
 
 class Game:
-    __surface: pygame.Surface
-    __controller: Controller
+    __surface: Surface
     __scene: Scene
 
-    def __init__(self) -> None:
+    def __init__(self, starting_scene: Callable[[Game], Scene]) -> None:
         super().__init__()
 
         pygame.init()
 
         self.__surface = pygame.display.set_mode([500, 500])
-        self.__controller = Keyboard()
+        self.__scene = starting_scene(self)
 
-    def update(self, timedelta: timedelta) -> None:
-        self.__scene.update(timedelta, self)
+    def update(self, info: FrameInfo) -> None:
+        self.__scene.update(info, self)
 
-    def render(self, timedelta: timedelta) -> None:
-        self.__scene.render(timedelta, self)
+    def render(self, info: FrameInfo) -> None:
+        pygame.draw.rect(
+            self.__surface, (100, 149, 237), self.__surface.get_rect()
+        )
 
-    @property
-    def controller(self) -> Controller:
-        return self.__controller
+        self.__scene.render(info, self)
+        pygame.transform.rotate
+
+        pygame.display.flip()
 
     @property
     def surface(self) -> pygame.Surface:
@@ -42,14 +53,16 @@ class Game:
         return self.__scene
 
     @staticmethod
-    def start():
-        game = Game()
+    def start(starting_scene: Callable[[Game], Scene]) -> None:
+        game = Game(starting_scene)
 
         running = True
         time_point = pygame.time.get_ticks()
 
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
 
@@ -58,33 +71,12 @@ class Game:
             dt = timedelta(milliseconds=new_time_point - time_point)
             dt = dt if dt.total_seconds() > 0 else timedelta(milliseconds=1)
 
-            game.update(dt)
-            game.render(dt)
+            info = FrameInfo(dt, events)
+
+            game.update(info)
+            game.render(info)
 
             time_point = new_time_point
-
-
-class Actor(ABC):
-    """
-    An object that will be updated and rendered in the scene.
-    It can be a player, an enemy, a platform, etc.
-    """
-
-    @abstractmethod
-    def update(self, timedelta: timedelta, game: Game) -> None:
-        """Updates the actor."""
-        raise NotImplementedError()
-
-    @abstractmethod
-    def render(self, timedelta: timedelta, game: Game) -> None:
-        """Renders the actor."""
-        raise NotImplementedError()
-
-    @property
-    def z_index(self) -> int:
-        """The lower the first it gets rendered and updated."""
-
-        return 0
 
 
 class Scene(ABC):
@@ -102,7 +94,12 @@ class Scene(ABC):
     def __init__(self):
         self.__actors = []
 
-    def update(self, timedelta: timedelta, game: Game) -> None:
+        self.__appending_actors = []
+        self.__removing_actors = []
+
+        self.__actors_by_type = {}
+
+    def update(self, info: FrameInfo, game: Game) -> None:
         """
         Updates all the actors in the scene.
 
@@ -118,26 +115,31 @@ class Scene(ABC):
 
         for actor in self.__appending_actors:
             self.__actors.append(actor)
-            self.__actors_by_type[type(actor)].append(actor)
+            self.__actors_by_type.setdefault(type(actor), []).append(actor)
 
         self.__appending_actors.clear()
 
         for actor in self.__actors:
-            actor.update(timedelta, game)
+            actor.update(info, game)
 
         self.__actors.sort(key=lambda actor: actor.z_index)
 
-    def render(self, timedelta: timedelta, game: Game) -> None:
+    def render_actors(
+        self, info: FrameInfo, render_target: RenderTarget, game: Game
+    ):
         """
         Renders all the actors in the scene.
-
-        This method should be overridden by the subclass and call the
-        super method.
         """
         for actor in self.__actors:
-            actor.render(timedelta, game)
+            actor.render(info, render_target, game)
 
-    T = TypeVar("T", bound=Actor, covariant=True)
+    @abstractmethod
+    def render(self, info: FrameInfo, game: Game) -> None:
+        """Renders the scene."""
+
+        raise NotImplementedError()
+
+    T = TypeVar("T")
 
     def get_actors_of_instance(self, t: Type[T]) -> Generator[T, None, None]:
         """
@@ -149,6 +151,39 @@ class Scene(ABC):
                 for actor in actors:
                     yield actor  # type: ignore
 
+    def add_actor(self, actor: Actor) -> None:
+        """Adds an actor to the scene."""
+        self.__appending_actors.append(actor)
+
+    def remove_actor(self, actor: Actor) -> None:
+        """Removes an actor from the scene."""
+        self.__removing_actors.append(actor)
+
     @property
     def actors(self) -> Sequence[Actor]:
         return self.__actors
+
+
+class Actor(ABC):
+    """
+    An object that will be updated and rendered in the scene.
+    It can be a player, an enemy, a platform, etc.
+    """
+
+    @abstractmethod
+    def update(self, info: FrameInfo, game: Game) -> None:
+        """Updates the actor."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def render(
+        self, info: FrameInfo, render_target: RenderTarget, game: Game
+    ) -> None:
+        """Renders the actor."""
+        raise NotImplementedError()
+
+    @property
+    def z_index(self) -> int:
+        """The lower the first it gets rendered and updated."""
+
+        return 0

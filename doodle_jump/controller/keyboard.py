@@ -1,12 +1,49 @@
-from datetime import timedelta
+from pygame import K_LEFT, K_RIGHT, KEYDOWN, KEYUP
 from doodle_jump.controller import Controller
 
+from doodle_jump.game import FrameInfo, Game
+
+
 class Keyboard(Controller):
-    def update(self, delta: timedelta) -> None:
-        raise NotImplementedError
+    __shoot: bool
+
+    __left_pressed: bool
+    __right_pressed: bool
+
+    HORIZONTAL_SPEED = 150
+
+    def __init__(self):
+        self.__horizontal = 0
+
+        self.__shoot = False
+
+        self.__left_pressed = False
+        self.__right_pressed = False
+
+    def update(self, info: FrameInfo, game: Game) -> None:
+        for event in info.events:
+            if not event.type == KEYDOWN and not event.type == KEYUP:
+                continue
+
+            if event.key == K_LEFT:
+                self.__left_pressed = event.type == KEYDOWN
+            elif event.key == K_RIGHT:
+                self.__right_pressed = event.type == KEYDOWN
+
+        match self.__left_pressed, self.__right_pressed:
+            case (True, False):
+                self.__horizontal = (
+                    -Keyboard.HORIZONTAL_SPEED * info.time.total_seconds()
+                )
+            case (False, True):
+                self.__horizontal = (
+                    Keyboard.HORIZONTAL_SPEED * info.time.total_seconds()
+                )
+            case _:
+                self.__horizontal = 0
 
     def horizontal(self) -> float:
-        raise NotImplementedError
+        return self.__horizontal
 
     def shoot(self) -> bool:
-        raise NotImplementedError
+        return False
