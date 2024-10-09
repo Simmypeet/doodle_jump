@@ -16,7 +16,6 @@ class Platform(Actor):
         self.__image = image
 
     def update(self, info: FrameInfo, game: Game) -> None:
-
         pass
 
     def render(
@@ -26,6 +25,11 @@ class Platform(Actor):
             self.__image,
             self.__position,
         )
+
+    def notify_collision(self) -> None:
+        """Called when the player collides with (jumps on) the platform."""
+
+        pass
 
     @property
     def hitbox(self) -> Rectangle:

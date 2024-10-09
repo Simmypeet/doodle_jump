@@ -48,6 +48,7 @@ class Player(Actor):
             for platform in game.scene.get_actors_of_instance(Platform):
                 if self.hitbox.collides(platform.hitbox):
                     self.__speed_y = Player.SPEED_Y
+                    platform.notify_collision()
 
     def render(
         self, info: FrameInfo, render_target: RenderTarget, game: Game
