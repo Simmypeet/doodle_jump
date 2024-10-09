@@ -15,8 +15,8 @@ class Player(Actor):
     __image: Surface
     __speed_y: float
 
-    SPEED_Y = 250
-    GRAVITY = 100
+    SPEED_Y = 500
+    GRAVITY = 800
 
     def __init__(self, image: Surface):
         super().__init__()
