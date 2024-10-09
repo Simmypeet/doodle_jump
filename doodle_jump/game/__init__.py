@@ -9,6 +9,7 @@ from pygame.surface import Surface
 from pygame.event import Event
 
 import pygame
+import time
 
 from doodle_jump.render_target import RenderTarget
 
@@ -57,7 +58,7 @@ class Game:
         game = Game(starting_scene)
 
         running = True
-        time_point = pygame.time.get_ticks()
+        time_point = time.time()
 
         while running:
             events = pygame.event.get()
@@ -66,9 +67,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
 
-            new_time_point = pygame.time.get_ticks()
+            new_time_point = time.time()
 
-            dt = timedelta(milliseconds=new_time_point - time_point)
+            dt = timedelta(seconds=new_time_point - time_point)
             dt = dt if dt.total_seconds() > 0 else timedelta(milliseconds=1)
 
             info = FrameInfo(dt, events)
