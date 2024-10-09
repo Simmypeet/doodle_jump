@@ -10,7 +10,7 @@ from doodle_jump.render_target import RenderTarget
 class Main(Scene):
     """The main scene of the game."""
 
-    __playform_image: Surface
+    __platform_image: Surface
     __player_image: Surface
 
     __player: Player
