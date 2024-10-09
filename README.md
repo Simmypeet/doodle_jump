@@ -23,5 +23,5 @@ pip install -e .
 ## Running the Game
 
 ```
-python -m doodle_jump
+python -m doodle_jump.__main__
 ```
