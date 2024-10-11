@@ -15,16 +15,35 @@ class Player(Actor):
     __image: Surface
     __speed_y: float
 
+    # __image_list_right: list[Surface]
+    # __image_list_left: list[Surface]
+    # __is_moving_right: bool
+    # __is_moving_left: bool
+
+    # __fame_index: int
+    # __fame_timer: float
+
+
     SPEED_Y = 500
     GRAVITY = 800
 
     def __init__(self, image: Surface):
+    # def __init__(self, image_list_right: list[Surface], image_list_left: list[Surface]):
         super().__init__()
 
         self.__controller = Keyboard()
         self.__position = Vector2(0, 0)
         self.__image = image
         self.__speed_y = Player.SPEED_Y
+
+        # self.__image_list_right = image_list_right
+        # self.__image_list_left = image_list_left
+        # self.__is_moving_right = False;
+        # self.__is_moving_left = False;
+        # self.__fame_index = 0
+        # self.__fame_timer = 0
+
+
 
     def update(self, info: FrameInfo, game: Game) -> None:
         self.__controller.update(info, game)
@@ -61,6 +80,13 @@ class Player(Actor):
             ),
         )
 
+    # @property
+    # def current_image_list(self)-> list[Surface]:
+    #     if self.__is_moving_right:
+    #         return self.__image_list_right
+    #     return self.__image_list_left
+    #     # raise NotImplementedError()
+    
     @property
     def position(self) -> Vector2:
         return self.__position
@@ -73,3 +99,12 @@ class Player(Actor):
             self.__image.get_width(),
             self.__image.get_height(),
         )
+    
+    # @property
+    # def shotting(self) -> bool:
+    #     return self.__controller.shotting()
+
+
+    # hit the ground
+
+    # hit the enemy
