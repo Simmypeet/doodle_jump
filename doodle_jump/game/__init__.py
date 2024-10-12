@@ -24,6 +24,8 @@ class Game:
     __surface: Surface
     __scene: Scene
 
+    __is_running: bool
+
     def __init__(self, starting_scene: Callable[[Game], Scene]) -> None:
         super().__init__()
 
@@ -31,6 +33,8 @@ class Game:
 
         self.__surface = pygame.display.set_mode([500, 500])
         self.__scene = starting_scene(self)
+
+        self.is_running = True
 
     def update(self, info: FrameInfo) -> None:
         self.__scene.update(info, self)
@@ -52,6 +56,12 @@ class Game:
     @property
     def scene(self) -> Scene:
         return self.__scene
+    
+    def stop(self):
+        pygame.quit()
+        quit()
+        # self.__is_running = False  # Set the running flag to False
+        print("Game has stopped.")  # Optional: print a message or take other actions
 
     @staticmethod
     def start(starting_scene: Callable[[Game], Scene]) -> None:
@@ -156,9 +166,12 @@ class Scene(ABC):
         """Adds an actor to the scene."""
         self.__appending_actors.append(actor)
 
+
     def remove_actor(self, actor: Actor) -> None:
         """Removes an actor from the scene."""
         self.__removing_actors.append(actor)
+
+
 
     @property
     def actors(self) -> Sequence[Actor]:
