@@ -6,7 +6,9 @@ from doodle_jump.camera import Camera
 from doodle_jump.game import FrameInfo, Game, Scene
 from doodle_jump.render_target import RenderTarget
 
-from doodle_jump.actor.enemy import Enemy
+import random
+from time import sleep
+from doodle_jump.actor.enemy import Enemy,gen_enemies
 
 class Main(Scene):
     """The main scene of the game."""
@@ -45,20 +47,9 @@ class Main(Scene):
         )
         
 # 
-        self.__enemy_image = pygame.transform.scale_by(
-            pygame.image.load("resource/Enemies/flyMan_fly.png"), 0.5
-        )
-        starting_position = Vector2(0, -100)  # Example x, y coordinates
-        self.__enemy = Enemy(self.__enemy_image, starting_position)
-
-        # Add enemy to the scene
-        self.add_actor(self.__enemy)
-
-
-        # self.__enemy = Enemy(self.__enemy_image)
-
-        # self.add_actor(self.__enemy)
-
+        enemies = gen_enemies(5) 
+        for enemy in enemies:
+            self.add_actor(enemy)
 
 
     def update(self, info: FrameInfo, game: Game) -> None:
