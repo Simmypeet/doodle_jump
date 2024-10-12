@@ -2,8 +2,11 @@ from doodle_jump.actor.platform import Platform
 from doodle_jump.controller import Controller
 from doodle_jump.controller.keyboard import Keyboard
 from doodle_jump.game import Actor, FrameInfo, Game, RenderTarget
+from doodle_jump.actor.enemy import Enemy
 
+import pygame
 from pygame import Surface, Vector2
+
 
 
 from doodle_jump.math.rectangle import Rectangle
@@ -15,6 +18,10 @@ class Player(Actor):
     __image: Surface
     __speed_y: float
 
+    __bullets: list
+    __last_direction:int
+
+
     SPEED_Y = 500
     GRAVITY = 800
 
@@ -25,6 +32,11 @@ class Player(Actor):
         self.__position = Vector2(0, 0)
         self.__image = image
         self.__speed_y = Player.SPEED_Y
+
+        self.__bullets = []
+        self.__last_direction = -1
+
+
 
     def update(self, info: FrameInfo, game: Game) -> None:
         self.__controller.update(info, game)
@@ -50,6 +62,40 @@ class Player(Actor):
                     self.__speed_y = Player.SPEED_Y
                     platform.notify_collision()
 
+        # bullet
+        horizontal_input = self.__controller.horizontal()
+        if horizontal_input > 0:
+            self.__last_direction = 1 
+        elif horizontal_input < 0:
+            self.__last_direction = -1 
+        else:
+            self.__last_direction = self.__last_direction
+
+        self.__position.x += horizontal_input
+        self.__position.y -= self.__speed_y * info.time.total_seconds()
+
+        
+        if self.__controller.shoot():
+            bullet = Bullet(Vector2(self.__position.x + (self.__image.get_width() // 2), self.__position.y), "resource/Particles/portal_yellowParticle.png", self.__last_direction)
+            self.__bullets.append(bullet)
+            game.scene.add_actor(bullet)
+
+        for bullet in self.__bullets:
+            for enemy in game.scene.get_actors_of_instance(Enemy):
+                if bullet.hitbox.collides(enemy.hitbox):
+                    game.scene.remove_actor(bullet)
+                    game.scene.remove_actor(enemy)
+                    self.__bullets.remove(bullet)
+                    break
+        # die
+        for enemy in game.scene.get_actors_of_instance(Enemy):
+            if self.hitbox.collides(enemy.hitbox):
+                game.stop()  
+
+        if self.__position.y > game.surface.get_height() / 2+200:
+            game.stop() 
+            
+
     def render(
         self, info: FrameInfo, render_target: RenderTarget, game: Game
     ) -> None:
@@ -61,6 +107,8 @@ class Player(Actor):
             ),
         )
 
+
+    
     @property
     def position(self) -> Vector2:
         return self.__position
@@ -73,3 +121,29 @@ class Player(Actor):
             self.__image.get_width(),
             self.__image.get_height(),
         )
+    
+class Bullet(Actor):
+    def __init__(self, position: Vector2, image_path: str, direction: int):
+        super().__init__()
+        self.__position = position
+        self.__speed = 400  
+        self.__direction = direction  
+        self.__image = pygame.image.load(image_path)  
+        self.__image = pygame.transform.scale(self.__image, (10, 5)) 
+
+    def update(self, info: FrameInfo, game: Game) -> None:
+        self.__position.x += self.__speed * self.__direction * info.time.total_seconds()
+
+        screen_width = game.surface.get_width()
+
+        if self.__position.x + self.__image.get_width() > screen_width - 230:
+            game.scene.remove_actor(self)
+        if self.__position.x < -280:
+            game.scene.remove_actor(self)
+        
+    def render(self, info: FrameInfo, render_target: RenderTarget, game: Game) -> None:
+        render_target.blit(self.__image, self.__position)
+
+    @property
+    def hitbox(self) -> Rectangle:
+        return Rectangle(self.__position.x, self.__position.y, self.__image.get_width(), self.__image.get_height())

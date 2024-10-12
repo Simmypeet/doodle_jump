@@ -6,6 +6,9 @@ from doodle_jump.camera import Camera
 from doodle_jump.game import FrameInfo, Game, Scene
 from doodle_jump.render_target import RenderTarget
 
+import random
+from time import sleep
+from doodle_jump.actor.enemy import Enemy,gen_enemies
 
 class Main(Scene):
     """The main scene of the game."""
@@ -42,6 +45,12 @@ class Main(Scene):
         self.__y_camera = (
             -game.surface.get_height() / 2 + self.__platform_image.get_height()
         )
+        
+# 
+        enemies = gen_enemies(5) 
+        for enemy in enemies:
+            self.add_actor(enemy)
+
 
     def update(self, info: FrameInfo, game: Game) -> None:
         super().update(info, game)
