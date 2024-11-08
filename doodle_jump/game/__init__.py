@@ -56,12 +56,14 @@ class Game:
     @property
     def scene(self) -> Scene:
         return self.__scene
-    
+
     def stop(self):
         pygame.quit()
         quit()
         # self.__is_running = False  # Set the running flag to False
-        print("Game has stopped.")  # Optional: print a message or take other actions
+        print(
+            "Game has stopped."
+        )  # Optional: print a message or take other actions
 
     @staticmethod
     def start(starting_scene: Callable[[Game], Scene]) -> None:
@@ -98,7 +100,7 @@ class Scene(ABC):
     __actors: list[Actor]
 
     __appending_actors: list[Actor]
-    __removing_actors: list[Actor]
+    __removing_actors: set[Actor]
 
     __actors_by_type: dict[type, list[Actor]]
 
@@ -106,7 +108,7 @@ class Scene(ABC):
         self.__actors = []
 
         self.__appending_actors = []
-        self.__removing_actors = []
+        self.__removing_actors = set()
 
         self.__actors_by_type = {}
 
@@ -166,12 +168,9 @@ class Scene(ABC):
         """Adds an actor to the scene."""
         self.__appending_actors.append(actor)
 
-
     def remove_actor(self, actor: Actor) -> None:
         """Removes an actor from the scene."""
-        self.__removing_actors.append(actor)
-
-
+        self.__removing_actors.add(actor)
 
     @property
     def actors(self) -> Sequence[Actor]:
@@ -201,4 +200,3 @@ class Actor(ABC):
         """The lower the first it gets rendered and updated."""
 
         return 0
-
