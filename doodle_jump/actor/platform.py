@@ -9,11 +9,14 @@ class Platform(Actor):
     __position: Vector2
     __image: Surface
 
+    player_was_on_top: bool
+
     def __init__(self, image: Surface, position: Vector2) -> None:
         super().__init__()
 
         self.__position = position
         self.__image = image
+        self.player_was_on_top = False
 
     def update(self, info: FrameInfo, game: Game) -> None:
         pass

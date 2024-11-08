@@ -50,11 +50,21 @@ class Player(Actor):
             self.__position.x = display_half_width
 
         # detect hit with platform
-        if self.__speed_y < 0:
-            for platform in game.scene.get_actors_of_instance(Platform):
-                if self.hitbox.collides(platform.hitbox):
-                    self.__speed_y = Player.SPEED_Y
-                    platform.notify_collision()
+        player_hitbox = self.hitbox
+        for platform in game.scene.get_actors_of_instance(Platform):
+            platform_hitbox = platform.hitbox
+
+            if (
+                player_hitbox.collides(platform_hitbox)
+                and self.__speed_y < 0
+                and platform.player_was_on_top
+            ):
+                self.__speed_y = Player.SPEED_Y
+                platform.notify_collision()
+
+            platform.player_was_on_top = (
+                player_hitbox.top + player_hitbox.height < platform_hitbox.top
+            )
 
         # bullet
         horizontal_input = self.__controller.horizontal()
