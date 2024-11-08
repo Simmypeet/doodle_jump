@@ -31,7 +31,7 @@ class Game:
 
         pygame.init()
 
-        self.__surface = pygame.display.set_mode([500, 500])
+        self.__surface = pygame.display.set_mode([500, 800])
         self.__scene = starting_scene(self)
 
         self.is_running = True

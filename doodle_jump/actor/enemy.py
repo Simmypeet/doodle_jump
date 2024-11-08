@@ -54,26 +54,25 @@ class Enemy(Actor):
             self.__image.get_width(),
             self.__image.get_height(),
         )
-def gen_enemies(number: int)->list[Enemy]:
-    notoverlap = -100
-    enemies = ["resource/Enemies/flyMan_fly.png", "resource/Enemies/spikeBall_2.png"
-               ,"resource/Enemies/spikeMan_stand.png","resource/Enemies/cloud.png",
-               "resource/Enemies/springMan_stand.png","resource/Enemies/sun1.png",
-               "resource/Enemies/wingMan1.png"]
-    generated_enemies = []  
-
-    for _ in range(number):
-        rand_idx = random.randint(0, len(enemies) - 1)
-        image = pygame.transform.scale(
-            pygame.image.load(enemies[rand_idx]), (50, 50) 
-        )
-        position = random.randrange(80, 200)
-        notoverlap += position 
-        start_position = Vector2(-400, -350 - notoverlap)#use for resize x and y
-
-        enemy = Enemy(image, start_position) 
-        generated_enemies.append(enemy) 
-
-    return generated_enemies 
 
 
+def gen_enemies(pos_x: float, pos_y: float) -> Enemy:
+    enemies = [
+        "resource/Enemies/flyMan_fly.png",
+        "resource/Enemies/spikeBall_2.png",
+        "resource/Enemies/spikeMan_stand.png",
+        "resource/Enemies/cloud.png",
+        "resource/Enemies/springMan_stand.png",
+        "resource/Enemies/sun1.png",
+        "resource/Enemies/wingMan1.png",
+    ]
+
+    rand_idx = random.randint(0, len(enemies) - 1)
+    image = pygame.transform.scale(
+        pygame.image.load(enemies[rand_idx]), (50, 50)
+    )
+    start_position = Vector2(
+        pos_x - image.get_width() / 2, pos_y - image.get_height()
+    )
+
+    return Enemy(image, start_position)
