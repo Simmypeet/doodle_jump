@@ -1,39 +1,45 @@
 from doodle_jump.game import Actor, FrameInfo, Game, RenderTarget
 from pygame import Surface, Vector2
-import pygame
-import random  
 from doodle_jump.math.rectangle import Rectangle
-from time import sleep
+
+import pygame
+import random
+
 
 class Enemy(Actor):
     __speed_x: float
     __position: Vector2
     __image: Surface
-    __direction: int  
+    __direction: int
 
-    SPEED_X = 150  
+    SPEED_X = 150
 
     def __init__(self, image: Surface, position: Vector2) -> None:
         super().__init__()
 
-        self.__position = position 
+        self.__position = position
         self.__image = image
-        self.__speed_x = Enemy.SPEED_X 
-        self.__direction = 1  
+        self.__speed_x = Enemy.SPEED_X
+        self.__direction = 1
 
     def update(self, info: FrameInfo, game: Game) -> None:
-    
-        self.__position.x += self.__speed_x * self.__direction * info.time.total_seconds()
 
+        self.__position.x += (
+            self.__speed_x * self.__direction * info.time.total_seconds()
+        )
 
-        screen_width = game.surface.get_width()
+        display_half_width = game.surface.get_width() / 2
+        if self.__position.x > display_half_width and self.__direction == 1:
+            self.__direction = -1
+        elif (
+            self.__position.x + self.__image.get_width() < -display_half_width
+            and self.__direction == -1
+        ):
+            self.__direction = 1
 
-        if self.__position.x + self.__image.get_width() > screen_width - 230:
-            self.__direction = -1  
-        elif self.__position.x < -280:
-            self.__direction = 1  
-
-    def render(self, info: FrameInfo, render_target: RenderTarget, game: Game) -> None:
+    def render(
+        self, info: FrameInfo, render_target: RenderTarget, game: Game
+    ) -> None:
         render_target.blit(self.__image, self.__position)
 
     @property
