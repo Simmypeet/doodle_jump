@@ -24,7 +24,7 @@ class Game:
     __surface: Surface
     __scene: Scene
 
-    __is_running: bool
+    __next_scene: Scene | None
 
     def __init__(self, starting_scene: Callable[[Game], Scene]) -> None:
         super().__init__()
@@ -33,10 +33,13 @@ class Game:
 
         self.__surface = pygame.display.set_mode([500, 800])
         self.__scene = starting_scene(self)
-
-        self.is_running = True
+        self.__next_scene = None
 
     def update(self, info: FrameInfo) -> None:
+        if self.__next_scene is not None:
+            self.__scene = self.__next_scene
+            self.__next_scene = None
+
         self.__scene.update(info, self)
 
     def render(self, info: FrameInfo) -> None:
@@ -48,6 +51,11 @@ class Game:
         pygame.transform.rotate
 
         pygame.display.flip()
+
+    def change_scene(self, scene: Scene) -> None:
+        """Change to the given scene in the next frame."""
+
+        self.__next_scene = scene
 
     @property
     def surface(self) -> pygame.Surface:
